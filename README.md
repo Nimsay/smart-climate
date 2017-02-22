@@ -1,6 +1,15 @@
 # Smart Climate - UBO
 Authors: Yasmin AIT MAKSENE & Hassina GADA
 
+## Objectif
+Réaliser une application de visualisation de données météo (méteo france)
+utilisable hors ligne.
+L'application doit être:
+ - utilisable telle quelle (sans dépendance externe)
+ - disponible hors ligne.
+
+ 
+
 ## Données méteo
 
 ### Données journalières

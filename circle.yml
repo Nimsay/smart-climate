@@ -1,3 +1,9 @@
 machine:
   java:
     version: oraclejdk8
+
+test:
+  override:
+   - mvn clean
+   - mvn dependency:resolve
+   - mvn test -Dtest=test/utils/UtilsTest

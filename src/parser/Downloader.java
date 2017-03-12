@@ -14,7 +14,7 @@ public class Downloader {
 
     final String cacheDir = "./cache";
 
-    Downloader() throws IOException {
+    public  Downloader() throws IOException {
 
         File cache = new File(cacheDir);
         if (!cache.exists() && !cache.mkdirs() ){
@@ -76,26 +76,38 @@ public class Downloader {
     public String download(String urlString) throws IOException {
 
         String filename = urlString.substring( urlString.lastIndexOf('/')+1, urlString.length() );
-        String basename = filename.substring( 0, filename.lastIndexOf('.'));
-        String srcFilePath = Paths.get(cacheDir, filename).toString();
-        String dstFilePath = Paths.get(cacheDir, basename).toString();
+        String ext = filename.substring(filename.lastIndexOf('.'), filename.length());
+        String localFile = Paths.get(cacheDir, filename).toString();
 
-        File csvFile = new File(dstFilePath);
-        if (csvFile.exists()){
-            System.out.println("csv already in cache, use it.");
-            return dstFilePath;
-        }
-        System.out.println("Download: " + urlString + " ==> " + srcFilePath);
-        download(urlString, srcFilePath);
+        /* Si urlString n'est pas un gz alors uncompressed == localfile */
+       String uncompressed = localFile;
 
-        System.out.println("GunZip: " + srcFilePath + " ==> " + dstFilePath);
-        if ( gunzip(srcFilePath, dstFilePath) ){
-            return dstFilePath;
+        if (ext.equals(".gz")){
+         String basename = filename.substring(0,filename.lastIndexOf('.'));
+         uncompressed =Paths.get(cacheDir, basename).toString();
         }
 
-        return "";
+        File uncompressedFile = new File ( uncompressed);
+        if (!uncompressedFile.exists()){
+            File compressedFile = new File(uncompressed);
+            if (!compressedFile.exists()){
+                System.out.println("Download: " + urlString + " ==> " + localFile);
+
+                if (!download(urlString, localFile)){
+                    return "";
+                }
+            }
+
+            System.out.println("GunZip: " + localFile + " ==> " + uncompressed);
+
+            if ( ext.equals(".gz") && !gunzip(localFile, uncompressed)){
+                return "";
+            }
+        }
+
+        return uncompressed;
+    }
 
     }
 
 
-}

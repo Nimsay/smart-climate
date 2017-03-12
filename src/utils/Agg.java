@@ -11,12 +11,14 @@ public class Agg {
     public static Double aggMax (ArrayList<String> resultat) {
         assert (resultat.size() > 0);
 
-        double max =0;
+        Double max = 0.0;
         Double tmpMax = 0.0;
-        for  (int i=0; i< resultat.size(); i++){
-            tmpMax =  Double.parseDouble(resultat.get(i));
-            if (max < tmpMax || !resultat.get(i).equals("mq") ){
-                max = tmpMax;
+        for(String r: resultat){
+            if (!r.equals("mq")){
+                tmpMax =  Double.parseDouble(r);
+                if (max < tmpMax){
+                    max = tmpMax;
+                }
             }
         }
 
@@ -26,13 +28,15 @@ public class Agg {
     public static Double aggMin (ArrayList<String> resultat) {
         assert (resultat.size() > 0);
 
-        double min = Double.parseDouble(resultat.get(0));
         Double tmpMin;
-        for ( int i=1; i< resultat.size(); i++){
-            tmpMin = Double.parseDouble(resultat.get(i));
-            if (min >tmpMin || !resultat.get(i).equals("mq") ){
-                min = Double.parseDouble(resultat.get(i));
-            }
+        Double min = Double.POSITIVE_INFINITY;
+        for ( String r: resultat){
+           if (!r.equals("mq")){
+                tmpMin = Double.parseDouble(r);
+                if (min > tmpMin){
+                    min = tmpMin;
+                }
+           }
         }
 
         return min;
@@ -40,9 +44,9 @@ public class Agg {
 
     public static Integer aggSize (ArrayList<String> resultat){
 
-        int size_L = resultat.size();
-        for (int i=0; i < size_L; i++){
-            if ( !resultat.get(i).equals("mq") ) size_L -= 1;
+        int size_L = 0;
+        for (String e: resultat){
+            if ( !e.equals("mq") ) size_L += 1;
         }
         return size_L;
     }

@@ -195,6 +195,48 @@ public class MainController {
         columnChoice.getSelectionModel().selectFirst();
 
 
+
+
+      /*
+        *   Listeners
+        * */
+
+
+        year1.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        @Override
+        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+            updateDay(newIndex.intValue(), month1.getSelectionModel().getSelectedIndex(),
+                    day1.getSelectionModel().getSelectedIndex(), 1 );
+            updateMonth(newIndex.intValue(), month1.getSelectionModel().getSelectedIndex(), 1);
+
+        }
+    });
+
+        year2.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        @Override
+        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+            updateDay(newIndex.intValue(), month2.getSelectionModel().getSelectedIndex(),
+                    day2.getSelectionModel().getSelectedIndex(), 2 );
+            updateMonth(newIndex.intValue(), month2.getSelectionModel().getSelectedIndex(), 2);
+        }
+    });
+
+        month1.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        @Override
+        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+            updateDay(year1.getSelectionModel().getSelectedIndex(), newIndex.intValue(),
+                    day1.getSelectionModel().getSelectedIndex(), 1 );
+        }
+    });
+
+        month2.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        @Override
+        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+            updateDay(year2.getSelectionModel().getSelectedIndex(), newIndex.intValue(),
+                    day2.getSelectionModel().getSelectedIndex(), 2 );
+        }
+    });
+
     }
 
     private void updateDay(int yearIndex, int monthIndex, int dayIndex, int dayChoiceBoxIndex){
@@ -210,12 +252,53 @@ public class MainController {
         }
     }
 
+    private void updateMonth(int yearIndex, int monthIndex, int yearChoiceBoxIndex){
+        ArrayList<String> monthsList = genMonths(Integer.parseInt(yearsList.get(yearIndex)));
+        monthIndex = monthIndex<=monthsList.size()-1 ? monthIndex : monthsList.size()-1;
+        if (yearChoiceBoxIndex==1) {
+            month1.setItems(FXCollections.observableArrayList(monthsList));
+            month1.getSelectionModel().select(monthIndex);
+        } else {
+            month2.setItems(FXCollections.observableArrayList(monthsList));
+            month2.getSelectionModel().select(monthIndex);
+        }
+    }
+
 
     @FXML public void applyFilters(ActionEvent event) throws IOException {
 
+        /*
+         * get the actual configuration
+         */
+
+        String date1 = yearsList.get(year1.getSelectionModel().getSelectedIndex());
+        String date2 = yearsList.get(year2.getSelectionModel().getSelectedIndex());
+
+        String currentMode = modeToggleGroup.getSelectedToggle().getUserData().toString();
+        if (currentMode.equals("monthMode") || currentMode.equals("dayMode")) {
+            date1 += String.format("%02d", month1.getSelectionModel().getSelectedIndex() + 1); // +1 because it's 0-based
+            date2 += String.format("%02d", month2.getSelectionModel().getSelectedIndex() + 1);
+        }
+        if(currentMode.equals("dayMode")){
+            date1 += days1List.get(day1.getSelectionModel().getSelectedIndex());
+            date2 += days1List.get(day2.getSelectionModel().getSelectedIndex());
+        }
+
+        String stationId = (String) stations.getSelectionModel().getSelectedItem().getKey();
+        String col = columnChoice.getSelectionModel().getSelectedItem().getKey();
+
+
+
+        ArrayList<Pair> dataPair1 = this.meteoFrance.get(date1, col, stationId);
+        ArrayList<Pair> dataPair2 = this.meteoFrance.get(date2, col, stationId);
+
+        String currentAggMode = aggMode.getSelectionModel().getSelectedItem().getKey();
+        this.plot.draw(compareCheckbox.isSelected(), dataPair1, dataPair2,
+                date1, date2, stationId, col, currentMode, currentAggMode);
+        // System.out.println();
 
     }
-
+        // Curves comparision
         @FXML
         public void onCompare (ActionEvent event){
             if (compareCheckbox.isSelected()) {

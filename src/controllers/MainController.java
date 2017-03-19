@@ -85,7 +85,7 @@ public class MainController {
         String stationsUrl = "https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/postesSynop.csv";
         String stationFile = downloader.download(stationsUrl);
 
-        CSV csv = new CSV(stationFile, ";", "\"", true, false);
+        CSV csv = new CSV(stationFile, ";", "\"", true);
         stationsName = new ArrayList<>();
         for (int i=0; i < csv.col(0).size(); i++){
             stationsName.add(new Pair(csv.col(0).get(i), csv.col(1).get(i) ));

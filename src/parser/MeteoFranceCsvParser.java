@@ -17,7 +17,7 @@ public class MeteoFranceCsvParser extends CSV {
 
     public MeteoFranceCsvParser(String csvFile) {
 
-        super(csvFile, ";", "", true, true);
+        super(csvFile, ";", "", true);
 
         this.stations = new HashMap<String, ArrayList<Integer>>(); // stationId: indexes
         this.days = new HashMap<String, ArrayList<Integer>>();     // days: indexes

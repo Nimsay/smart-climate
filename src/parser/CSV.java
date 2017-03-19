@@ -15,14 +15,14 @@ import java.util.List;
 public class CSV {
 
     String filename;
-    Integer nCols;
-    Integer nRows;
+    Integer nCols = 0;
+    Integer nRows = 0;
     ArrayList<String> header;
     String sep = ";";
     String del = "\"";
     ArrayList<ArrayList<String>> data;
 
-    public CSV(String csvFile, String sep, String del, boolean hasHeader, boolean removeLastCol) {
+    public CSV(String csvFile, String sep, String del, boolean hasHeader) {
         this.filename = csvFile;
         this.sep = sep;
         this.del = del;
@@ -39,7 +39,6 @@ public class CSV {
             while ((line = br.readLine()) != null) {
 
                 ArrayList<String> row = new ArrayList<String>(Arrays.asList(line.split(cvsSplitBy)));
-                if (removeLastCol){ row.remove(row.size()-1); }
 
                 if (lineIndex == 0){
                     this.nCols = row.size();

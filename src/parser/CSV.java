@@ -15,8 +15,8 @@ import java.util.List;
 public class CSV {
 
     String filename;
-    Integer nCols;
-    Integer nRows;
+    Integer nCols = 0;
+    Integer nRows = 0;
     ArrayList<String> header;
     String sep = ";";
     String del = "\"";

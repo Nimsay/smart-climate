@@ -1,3 +1,7 @@
+.text{
+    -fx-font-smoothing-type: lcd;
+}
+
 .menu-bar {
     -fx-background-color: #aeb5ba, linear-gradient(to bottom, #ecf4fa 0%, #ced4d9 100%);
     -fx-background-insets: 0, 0 0 1 0;
@@ -15,4 +19,147 @@
 .scroll-pane {
     -fx-background-insets: 0, 0;
     -fx-padding: 0;
+}
+
+#leftAnchorPane{
+    -fx-padding: 0 0 0 0;
+    -fx-background-color: linear-gradient(to bottom, rgb(250, 250, 250) 2%, rgb(240, 240, 240) 98%);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.7), 10, 0, 0, 0);
+
+}
+#leftPane{
+}
+
+.button, #aboutBtn{
+    -fx-background-color: #222222;
+    -fx-text-fill: #d6e9e6;
+    -fx-border-radius: 40;
+    -fx-background-radius: 40;
+}
+
+.button:hover, #aboutBtn:hover{
+    -fx-text-fill: #fff;
+}
+
+.button:pressed{
+    -fx-background-color: #368bcf;
+}
+
+.toggle-button {
+    -fx-background-color: #fff;
+    -fx-border-width: 2px;
+    -fx-border-insets:  0 0 -2px 0;
+    -fx-border-color: #1ECD97;
+    -fx-text-fill: #1ECD97;
+}
+
+#aboutBtn{
+    -fx-border-width: 0px;
+    -fx-background-color: #398827;
+}
+
+
+#aboutBtn:pressed, #aboutBtn:selected{
+    -fx-background-color: #45a408;
+}
+
+.toggle-button:hover,
+.toggle-button:selected
+{
+    -fx-background-color: #1ECD97;
+    -fx-text-fill: #ffffff;
+}
+
+#yearMode{
+    -fx-border-radius: 40 0 0 40;
+    -fx-background-radius: 40 0 0 40;
+    -fx-border-width: 2px 0 2px 2px;
+}
+
+#monthMode{
+    -fx-border-radius: 0 0 0 0;
+    -fx-background-radius: 0 0 0 0;
+}
+
+#dayMode{
+    -fx-border-radius: 0 40 40 0;
+    -fx-background-radius: 0 40 40 0;
+    -fx-border-width: 2px 2px 2px 0;
+}
+
+#celsiusMode{
+    -fx-border-radius: 40 0 0 40;
+    -fx-background-radius: 40 0 0 40;
+}
+
+#kelvinMode{
+    -fx-border-width: 2px 2px 2px 0;
+    -fx-border-radius: 0 40 40 0;
+    -fx-background-radius: 0 40 40 0;
+}
+
+
+#clearCacheBtn{
+    -fx-background-color: #cb272c;
+}
+
+
+
+#leftBottomPane{
+    -fx-background-color: #222222;
+}
+
+#applyFiltersBtn{
+    -fx-background-color: #3498db;
+}
+
+.choice-box{
+    -fx-background-color: #fff;
+    -fx-border-radius: 40;
+    -fx-background-radius: 40;
+    -fx-border-color: #1ECD97;
+    -fx-border-width: 2px;
+    -fx-text-fill: #222;
+}
+
+.check-box > .box{
+    -fx-border-width: 2px;
+    -fx-border-radius: 40;
+    -fx-background-radius: 40;
+    -fx-border-color: #1ECD97;
+    -fx-background-color: #fff;
+}
+
+#mainSplitPane{
+    -fx-border-width:0;
+    -fx-focus-color: transparent;
+    -fx-background-color: #151515;
+}
+
+#statusBar{
+        -fx-background-color: #000;
+}
+
+
+
+#mainSplitPane *.split-pane-divider {
+    -fx-padding: 0 0 0 0;
+    -fx-cursor: default;
+}
+
+#graphMode{
+    -fx-border-radius: 40 0 0 40;
+    -fx-background-radius: 40 0 0 40;
+    -fx-border-width: 2px 0 2px 2px;
+}
+
+#tableMode{
+    -fx-border-radius: 0 40 40 0;
+    -fx-background-radius: 0 40 40 0;
+    -fx-border-width: 2px 2px 2px 0;
+}
+
+
+#contentPane{
+    -fx-background-color: #151515;
 }

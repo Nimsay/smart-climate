@@ -1,0 +1,22 @@
+
+.text{
+    -fx-font-smoothing-type: lcd;
+}
+
+#aboutPane{
+    -fx-background-color: #151515;
+}
+
+#aboutTitle{
+    -fx-text-fill: #eee;
+}
+
+#aboutPartLeft, #aboutPartRight{
+    -fx-text-fill: #555;
+}
+
+#aboutHeart{ -fx-text-fill: red}
+
+#creditLine1, #creditLine2{
+    -fx-text-fill: #333;
+}

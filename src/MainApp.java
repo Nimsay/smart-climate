@@ -9,9 +9,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * Created by Thunderstorm on 16/02/2017.
- */
+
 public class MainApp extends Application{
 
 
@@ -36,6 +34,7 @@ public class MainApp extends Application{
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
+            primaryStage.setMaximized(true);
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,9 +42,7 @@ public class MainApp extends Application{
     }
 
     public static void main(String[] args) throws IOException {
-
         launch(args);
-
     }
-
 }
+

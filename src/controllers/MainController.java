@@ -1,36 +1,43 @@
 package controllers;
 
+import dao.Table;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
-//import javafx.util.Pair;
-import parser.MeteoFrance;
+import javafx.scene.layout.Pane;
+import source.CsvParser;
+import source.meteofrance.MeteoFrance;
 import utils.Pair;
-import parser.CSV;
-import parser.Downloader;
+import source.Downloader;
 import java.io.IOException;
 import java.util.*;
 
 
 public class MainController {
-    @FXML
-    AreaChart<String, Number> areaChart;
+
+    final String LAYOUT_ABOUT = "../views/AboutLayout.fxml";
+    final String LAYOUT_PLOTS = "../views/PlotsLayout.fxml";
+    final String LAYOUT_TABLE = "../views/TableLayout.fxml";
+
+    @FXML private AreaChart<String, Number> areaChart;
+    @FXML private ToggleButton aboutBtn;
+    @FXML private Pane contentPane;
     @FXML private CheckBox compareCheckbox;
     @FXML private ChoiceBox<String> year1, month1, day1, year2, month2, day2;
     @FXML private ChoiceBox<Pair> aggMode;
     @FXML private ChoiceBox<Pair> stations, columnChoice;
     @FXML private ToggleButton yearMode, monthMode, dayMode;
     @FXML private ToggleButton celsiusMode, kelvinMode;
-    @FXML private ToggleGroup tempUnitToggleGroup, modeToggleGroup;
-    @FXML NumberAxis xAxis;
-    @FXML NumberAxis yAxis;
+    @FXML private ToggleGroup tempUnitToggleGroup, modeToggleGroup, displayToggleGroup;
+    @FXML private ToggleButton graphMode, tableMode;
 
+    private FXMLLoader fxmlLoader;
     final private Integer METEO_FRANCE_MIN_YEAR = 1996;
 
     private ArrayList<String> yearsList, monthsList, days1List, days2List;
@@ -44,12 +51,17 @@ public class MainController {
     private ObservableList<Pair> columnsOlist;
 
     private MeteoFrance meteoFrance;
-    private PlotsController plot;
+    private AboutController aboutController;
+    private PlotsController plotsController;
+    private TableController tableController;
 
     public MainController() throws IOException {
 
+        this.aboutController = new AboutController();
         this.meteoFrance = new MeteoFrance();
-
+        this.plotsController = new PlotsController();
+        this.tableController = new TableController();
+        this.fxmlLoader = new FXMLLoader();
 
         // init yearlist, month list, daylist based on actual date
         yearsList = new ArrayList<>();
@@ -81,22 +93,15 @@ public class MainController {
         columnsOlist = FXCollections.observableArrayList(columnsList);
 
         // Download stations list if not in cache
-        Downloader downloader = new Downloader();
-        String stationsUrl = "https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/postesSynop.csv";
-        String stationFile = downloader.download(stationsUrl);
+        stationsName = this.meteoFrance.uiLists.getStationsList();
 
-        CSV csv = new CSV(stationFile, ";", "\"", true);
-        stationsName = new ArrayList<>();
-        for (int i=0; i < csv.col(0).size(); i++){
-            stationsName.add(new Pair(csv.col(0).get(i), csv.col(1).get(i) ));
-        }
     }
 
     /**
-     * Generate list of valid months
-     * @param year The year you want to generate the months for.
-     * @return An ArrayList of months from "Janvier" to "Décembre". of if year is the actual year,
-     * Return only months till the actual month.
+     * Genere une liste de mois valide.
+     * @param year l'année pour laquelle on veut génerer des mois .
+     * @return un ArrayList de mois en partant de "Janvier" à "Décembre". Si l'année est l'année actuelle,
+     * Retourne seuelemnt les mois jusqu'à la date actuelle.
      */
     private ArrayList<String> genMonths(Integer year) {
         ArrayList<String> months = new ArrayList<>();
@@ -117,12 +122,13 @@ public class MainController {
     }
 
     /**
-     * Generate list of days
-     * @param year The year you want to generate the months for
-     *@param month the month you want to generate the days for
-     *@return arraylist of days
+     * Genere une liste de jours.
+     * @param year l'année du mois pour lequel on veut generer la liste des jours.
+     * @param month le mois pour lequel on veut generer les jours.
+     * @return Un ArrayList de jours.
      */
-        private ArrayList<String> genDays(Integer year, Integer month){
+
+    private ArrayList<String> genDays(Integer year, Integer month){
         Calendar c = Calendar.getInstance();
         c.set(year, month, 1);
         Integer maxDays = c.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -146,16 +152,26 @@ public class MainController {
 
     @FXML void initialize() throws IOException {
 
+
+        /*
+        * Default view is Plot View
+        * */
+        switchView(LAYOUT_PLOTS, this.plotsController);
+
+
         /*
         * Init
         * */
-
-        this.plot = new PlotsController(this.areaChart);
 
         yearMode.setUserData("yearMode");
         monthMode.setUserData("monthMode");
         dayMode.setUserData("dayMode");
 
+        celsiusMode.setUserData("celsius");
+        kelvinMode.setUserData("kelvin");
+
+        graphMode.setUserData("graphMode");
+        tableMode.setUserData("tableMode");
 
         /*
         * Populate choice boxes
@@ -194,49 +210,44 @@ public class MainController {
         columnChoice.setItems( columnsOlist );
         columnChoice.getSelectionModel().selectFirst();
 
-
-
-
-      /*
+        /*
         *   Listeners
         * */
 
-
         year1.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-        @Override
-        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
-            updateDay(newIndex.intValue(), month1.getSelectionModel().getSelectedIndex(),
-                    day1.getSelectionModel().getSelectedIndex(), 1 );
-            updateMonth(newIndex.intValue(), month1.getSelectionModel().getSelectedIndex(), 1);
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+                updateDay(newIndex.intValue(), month1.getSelectionModel().getSelectedIndex(),
+                        day1.getSelectionModel().getSelectedIndex(), 1 );
+                updateMonth(newIndex.intValue(), month1.getSelectionModel().getSelectedIndex(), 1);
 
-        }
-    });
+            }
+        });
 
         year2.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-        @Override
-        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
-            updateDay(newIndex.intValue(), month2.getSelectionModel().getSelectedIndex(),
-                    day2.getSelectionModel().getSelectedIndex(), 2 );
-            updateMonth(newIndex.intValue(), month2.getSelectionModel().getSelectedIndex(), 2);
-        }
-    });
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+                updateDay(newIndex.intValue(), month2.getSelectionModel().getSelectedIndex(),
+                        day2.getSelectionModel().getSelectedIndex(), 2 );
+                updateMonth(newIndex.intValue(), month2.getSelectionModel().getSelectedIndex(), 2);
+            }
+        });
 
         month1.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-        @Override
-        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
-            updateDay(year1.getSelectionModel().getSelectedIndex(), newIndex.intValue(),
-                    day1.getSelectionModel().getSelectedIndex(), 1 );
-        }
-    });
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+                updateDay(year1.getSelectionModel().getSelectedIndex(), newIndex.intValue(),
+                        day1.getSelectionModel().getSelectedIndex(), 1 );
+            }
+        });
 
         month2.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-        @Override
-        public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
-            updateDay(year2.getSelectionModel().getSelectedIndex(), newIndex.intValue(),
-                    day2.getSelectionModel().getSelectedIndex(), 2 );
-        }
-    });
-
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldIndex, Number newIndex) {
+                updateDay(year2.getSelectionModel().getSelectedIndex(), newIndex.intValue(),
+                        day2.getSelectionModel().getSelectedIndex(), 2 );
+            }
+        });
     }
 
     private void updateDay(int yearIndex, int monthIndex, int dayIndex, int dayChoiceBoxIndex){
@@ -252,7 +263,7 @@ public class MainController {
         }
     }
 
-    private void updateMonth(int yearIndex, int monthIndex, int yearChoiceBoxIndex){
+    private void updateMonth(Integer yearIndex, Integer monthIndex, Integer yearChoiceBoxIndex){
         ArrayList<String> monthsList = genMonths(Integer.parseInt(yearsList.get(yearIndex)));
         monthIndex = monthIndex<=monthsList.size()-1 ? monthIndex : monthsList.size()-1;
         if (yearChoiceBoxIndex==1) {
@@ -264,8 +275,15 @@ public class MainController {
         }
     }
 
+    /**
+     * Methode de l'interface permettant de recuperer la configuratuion de l'utilisateur pour qu'on puisse afficher les donnees souhaitees.
+     */
+    @FXML public void applyFilters(ActionEvent event) throws IOException, InterruptedException {
+        /*
+        * If we are in AboutView, get back to PlotsView
+        * */
 
-    @FXML public void applyFilters(ActionEvent event) throws IOException {
+        this.aboutBtn.setSelected(false);
 
         /*
          * get the actual configuration
@@ -287,86 +305,139 @@ public class MainController {
         String stationId = (String) stations.getSelectionModel().getSelectedItem().getKey();
         String col = columnChoice.getSelectionModel().getSelectedItem().getKey();
 
-
-
-        ArrayList<Pair> dataPair1 = this.meteoFrance.get(date1, col, stationId);
-        ArrayList<Pair> dataPair2 = this.meteoFrance.get(date2, col, stationId);
-
         String currentAggMode = aggMode.getSelectionModel().getSelectedItem().getKey();
-        this.plot.draw(compareCheckbox.isSelected(), dataPair1, dataPair2,
-                date1, date2, stationId, col, currentMode, currentAggMode);
-        // System.out.println();
 
+        String tempUnit = tempUnitToggleGroup.getSelectedToggle().getUserData().toString();
+        String displayMode = displayToggleGroup.getSelectedToggle().getUserData().toString();
+
+        /*
+         * Get data based on current configuration
+         */
+
+        if (displayMode.equals("graphMode")){
+            switchView(LAYOUT_PLOTS, this.plotsController);
+
+            ArrayList<Pair> dataPair1 = this.meteoFrance.get(date1, col, stationId, currentAggMode, tempUnit);
+
+            ArrayList<Pair> dataPair2 = new ArrayList<>();
+            if (compareCheckbox.isSelected()){
+                dataPair2 = this.meteoFrance.get(date2, col, stationId, currentAggMode, tempUnit);
+            }
+            this.plotsController.draw(compareCheckbox.isSelected(), dataPair1, dataPair2,
+                currentMode);
+        } else {
+            switchView(LAYOUT_TABLE, this.tableController);
+
+            ArrayList<String> cols = new ArrayList<>();
+            cols.add("date");
+            cols.add("t");
+            cols.add("u");
+            cols.add("n");
+
+            Table table = this.meteoFrance.getRaw(date1, cols, stationId);
+
+            // Renomer le header
+            ArrayList<String> header = new ArrayList<>();
+            header.add("Date & Heure");
+            header.add("Température");
+            header.add("Humidité");
+            header.add("Nebulosité totale");
+            table.header = header;
+
+            this.tableController.display(table);
+        }
     }
-        // Curves comparision
-        @FXML
-        public void onCompare (ActionEvent event){
-            if (compareCheckbox.isSelected()) {
-                year2.setDisable(false);
 
-                if (dayMode.isSelected() || monthMode.isSelected()) {
-                    month2.setDisable(false);
-                }
-                if (dayMode.isSelected()) {
-                    day2.setDisable(false);
-                }
-            } else {
-                year2.setDisable(true);
-                month2.setDisable(true);
-                day2.setDisable(true);
-            }
+    @FXML public void aboutBtnClicked(ActionEvent event) throws IOException {
+        ToggleButton aboutToggleBtn = (ToggleButton) event.getSource();
+
+        if (aboutToggleBtn.isSelected()) {
+            switchView(LAYOUT_ABOUT, this.aboutController);
+        } else {
+            switchView(LAYOUT_PLOTS, this.plotsController);
         }
+    }
 
-        @FXML
-        public void onKelvinSelected () {
-            System.out.println("Kelvin Selected");
-        }
+    /**
+     * Permet de charger un nouveau fichier fxml et son controlleur.
+     */
+    private void switchView(String layout, Object controller) throws IOException {
+        this.contentPane.getChildren().clear();
+        this.fxmlLoader.setRoot(null);
+        this.fxmlLoader.setLocation(getClass().getResource(layout));
+        this.fxmlLoader.setController(controller);
+        this.contentPane.getChildren().add(this.fxmlLoader.load());
+    }
 
-        @FXML
-        public void onCelsiusSelected () {
-            System.out.println("Celsius Selected");
-        }
+    /**
+     *C'est methode permettant d'activer ou desactiver les controls.
+     */
+    @FXML public void onCompare(ActionEvent event){
+        if (compareCheckbox.isSelected()){
+            year2.setDisable(false);
 
-        @FXML
-        public void onYearMode (ActionEvent event){
-            year1.setDisable(false);
-            month1.setDisable(true);
-            day1.setDisable(true);
-            if (compareCheckbox.isSelected()) {
-                year2.setDisable(false);
-                month2.setDisable(true);
-                day2.setDisable(true);
-            }
-        }
-
-        @FXML
-        public void onMonthMode (ActionEvent event){
-            year1.setDisable(false);
-            month1.setDisable(false);
-            day1.setDisable(true);
-            if (compareCheckbox.isSelected()) {
+            if ( dayMode.isSelected() || monthMode.isSelected() ){
                 month2.setDisable(false);
-                year2.setDisable(false);
-                day2.setDisable(true);
             }
-        }
-
-        @FXML
-        public void onDayMode (ActionEvent event){
-            year1.setDisable(false);
-            month1.setDisable(false);
-            day1.setDisable(false);
-            if (compareCheckbox.isSelected()) {
-                year2.setDisable(false);
-                month2.setDisable(false);
+            if (dayMode.isSelected()){
                 day2.setDisable(false);
             }
+        } else {
+            year2.setDisable(true);
+            month2.setDisable(true);
+            day2.setDisable(true);
         }
+    }
 
+    @FXML public void onYearMode(ActionEvent event){
+        year1.setDisable(false);
+        month1.setDisable(true);
+        day1.setDisable(true);
+        if (compareCheckbox.isSelected()) {
+            year2.setDisable(false);
+            month2.setDisable(true);
+            day2.setDisable(true);
+        }
+    }
+
+    @FXML public void onMonthMode(ActionEvent event){
+        year1.setDisable(false);
+        month1.setDisable(false);
+        day1.setDisable(true);
+        if (compareCheckbox.isSelected()) {
+            month2.setDisable(false);
+            year2.setDisable(false);
+            day2.setDisable(true);
+        }
+    }
+
+    @FXML public void onDayMode(ActionEvent event){
+        year1.setDisable(false);
+        month1.setDisable(false);
+        day1.setDisable(false);
+        if (compareCheckbox.isSelected()) {
+            year2.setDisable(false);
+            month2.setDisable(false);
+            day2.setDisable(false);
+        }
+    }
+
+    @FXML public void onGraphModeSelected(ActionEvent event) throws IOException {
+        switchView(LAYOUT_PLOTS, this.plotsController);
+        aggMode.setDisable(false);
+        columnChoice.setDisable(false);
+    }
+
+    @FXML public void onTableModeSelected(ActionEvent event) throws IOException {
+        compareCheckbox.setSelected(false);
+        aggMode.setDisable(true);
+        columnChoice.setDisable(true);
+        onCompare(new ActionEvent());
+        switchView(LAYOUT_TABLE, this.tableController);
     }
 
 
 
 
-
+}
 

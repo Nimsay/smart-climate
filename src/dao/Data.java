@@ -3,36 +3,40 @@ package dao;
 /**
  * Created by hassina on 12/03/2017.
  */
-import parser.MeteoFranceCsvParser;
-import utils.Pair;
+import source.Cache;
+import source.Downloader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import parser.Downloader;
 
 public class Data {
-    private final String baseUrl = "https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/Archive/synop.";
-    private final String extUrl = ".csv.gz";
     Downloader downloader;
-
-    public Data() throws IOException {
-        downloader = new Downloader();
+    Cache cache;
+    public Data(Downloader downloader, Cache cache){
+        this.downloader = downloader;
+        this.cache = cache;
     }
-    public ArrayList<Pair> year(String datetime, String stationId, String col) throws IOException {
-        ArrayList<Pair> result = new ArrayList<Pair>();
-        for (int m=1; m<=12; m++){
-            String mois = String.format("%02d", m);
-            String csvUrl = baseUrl + datetime + mois + extUrl;
-            String csvFile = downloader.download(csvUrl);
-            if (!csvFile.equals("")) {
-                MeteoFranceCsvParser csv = new MeteoFranceCsvParser(csvFile);
-                result.addAll(csv.select(datetime, stationId, col));
-            }
-        }
+    /**
+     * fonction qui permet d'instancier un objet de type year
+     * @param year chaine de 4 caractères contenant une année valide le met dans l'objet retourné
+     * @return un objet de type Year
 
-        return result;
+     */
+    public Year getYear(String year) throws IOException {
+        assert year.length() == 4;
+        return new Year(year, downloader, cache);
+    }
+
+    /**
+     * fonction qui permet d'instancier un objet de type Month
+     * @param year chaine de 4 caractères contenant une année valide et le met dans l'objet retourné
+     * @param month chaine de 2 caractères contenant un mois valide et le met dans l'objet retourné
+     * @return un objet de type Month
+
+     */
+
+    public Month getMonth(String year, String month) throws IOException {
+        assert month.length() == 2;
+        return new Month(year, month, downloader, cache);
     }
 
 

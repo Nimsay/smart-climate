@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.AreaChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.StackPane?>
+
+<?import java.net.URL?>
+<StackPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <AreaChart fx:id="areaChart" animated="false" prefHeight="400.0" prefWidth="600.0">
+         <xAxis>
+            <CategoryAxis side="BOTTOM" />
+         </xAxis>
+         <yAxis>
+            <NumberAxis side="LEFT" />
+         </yAxis>
+      </AreaChart>
+   </children>
+   <stylesheets>
+      <URL value="@PlotsLayout.css" />
+   </stylesheets>
+</StackPane>

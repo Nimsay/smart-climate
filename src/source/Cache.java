@@ -1,8 +1,17 @@
 package source;
 
+
+
+import dao.Table;
+
 /**
- * Created by hassina gada on 06/04/2017.
+ * toutes classes qui sera implémentées à partir de cette interface
+ * implémentera obligatoirement les méthodes défini dans cette dérnière
  */
-public class Cache
-{
+public interface Cache {
+
+    boolean exists(String year, String month);
+    boolean complete(String year, String month);
+    Table load(String year, String month);
+
 }

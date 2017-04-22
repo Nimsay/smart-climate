@@ -1,8 +1,6 @@
 package controllers;
 
-/**
- * Created by hassina on 12/03/2017.
- */
+import javafx.fxml.FXML;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.XYChart;
 import utils.Pair;
@@ -11,11 +9,8 @@ import java.util.*;
 
 public class PlotsController {
 
+    @FXML
     AreaChart<String,Number> areaChart;
-
-    PlotsController(AreaChart<String, Number> areaChart){
-        this.areaChart = areaChart;
-    }
 
     private LinkedHashMap<String, Double> agg(ArrayList<Pair> dataPair, String currentMode){
         // Aggregate
@@ -55,9 +50,17 @@ public class PlotsController {
         return series;
     }
 
-    public void draw(boolean compare, ArrayList<Pair> dataPair1, ArrayList<Pair> dataPair2,
-                     String date1, String date2, String stationId, String col, String currentMode,
-                     String currentAggMode){
+
+    /**
+     * Permet de dessiner dans l'interface sous forme de graphe les données souhaitées.
+     * @param compare qui est un booléen permettant de savoir si on veut faire une comparaison( entre deux mois, deux années..etc).
+     * @param dataPair1 qui est une arrayList qui contiendera la premiere liste de données à afficher sous forme de graphe.
+     * @param dataPair2 qui est une arrayList qui contiendera la deuxième liste de données pour effectuer la compraison.
+     * @param currentMode le mode selectionné pour l'affichage( afficher un mois, une année, un jour).
+     * @return
+     */
+    public void draw(boolean compare, ArrayList<Pair> dataPair1, ArrayList<Pair> dataPair2, String currentMode
+                     ){
 
 
         this.areaChart.getData().clear();

@@ -1,8 +1,6 @@
 package utils;
 
-/**
- * Created by hassina on 12/03/2017.
- */
+
 public class Pair {
 
     private String key, value;

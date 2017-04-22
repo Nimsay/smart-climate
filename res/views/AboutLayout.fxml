@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="aboutPane" alignment="CENTER" prefHeight="201.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="aboutTitle" prefHeight="37.0" prefWidth="255.0" text="Smart Climate" textFill="#4d4c4c">
+         <font>
+            <Font name="System Bold" size="31.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER" prefHeight="45.0" prefWidth="470.0">
+         <children>
+            <Label fx:id="aboutPartLeft" alignment="CENTER" prefHeight="18.0" prefWidth="80.0" text="Made with">
+               <font>
+                  <Font name="System Italic" size="14.0" />
+               </font></Label>
+            <Label fx:id="aboutHeart" prefHeight="21.0" prefWidth="18.0" text="❤">
+               <font>
+                  <Font size="18.0" />
+               </font></Label>
+            <Label fx:id="aboutPartRight" prefHeight="18.0" prefWidth="300.0" text="by Hassina GADA &amp; Yasmin AIT MAKSENE">
+               <font>
+                  <Font name="System Italic" size="14.0" />
+               </font></Label>
+         </children>
+      </HBox>
+      <Label fx:id="creditLine1" prefHeight="23.0" prefWidth="298.0" text="Les données utilisées dans cette application" />
+      <HBox alignment="CENTER" prefHeight="23.0" prefWidth="470.0">
+         <children>
+            <Label fx:id="creditLine2" text="appartiennent à" />
+            <Hyperlink onAction="#OpenMeteoFranceCom" text="Météo-France" />
+         </children>
+      </HBox>
+   </children>
+   <stylesheets>
+      <URL value="@AboutLayout.css" />
+   </stylesheets>
+</VBox>
